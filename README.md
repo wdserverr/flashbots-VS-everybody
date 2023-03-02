@@ -48,7 +48,9 @@ Cara menjalankan script
 ```bash
   ts-node kirimETH.ts
 ```
-
+## CONTOH
+2 transaksi akan terkirim dalam 1 blok yg sama
+![flasbot](https://user-images.githubusercontent.com/42107311/222519557-2d3587cb-6d1c-453a-ada6-d71c23eb9a9b.png)
 
 ## Kirim Token
 
