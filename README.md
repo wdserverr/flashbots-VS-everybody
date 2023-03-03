@@ -11,7 +11,7 @@ Cara menjalankan script
   npm install
 ```
 ```bash
-  npm install -g typescript
+  npm install -g ts-node
 ```
 ```bash
   isi KEY_OWNER & KEY_KORBAN dengan private key
