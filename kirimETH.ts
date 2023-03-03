@@ -1,4 +1,4 @@
-import { providers, Wallet, utils } from 'ethers'
+import { providers, Wallet, utils, BigNumber } from 'ethers'
 import { FlashbotsBundleProvider, FlashbotsBundleResolution } from '@flashbots/ethers-provider-bundle'
 import { exit } from 'process'
 
@@ -7,7 +7,6 @@ Dibawah ini relay ethereum mainnet, klo mau pake relay lain bisa dicari disini
 
 https://boost-relay.flashbots.net/
 https://github.com/flashbots/mev-boost-relay
-https://github.com/eth-educators/ethstaker-guides/blob/main/MEV-relay-list.md#mev-relay-list-for-goerli-testnet
 
 WARNING!! link diatas bukan relay, tapi buat cari kumpulan relay yg aktif
 */
@@ -15,8 +14,8 @@ WARNING!! link diatas bukan relay, tapi buat cari kumpulan relay yg aktif
 // klo mau pake di jaringan ethereum mainnet, ganti https://relay-goerli.flashbots.net jadi https://relay.flashbots.net dibawah
 
 const RELAY = 'https://relay-goerli.flashbots.net'  // Relay url goerli, klo mau jalanin script di ethereum mainnet ganti pake relay mainnet
-const KEY_OWNER = '0x...Privatkey' // ini di isi private key pribadi buat ngirim eth ke wallet korban buat gas fee
-const KEY_KORBAN = '0x...PrivatKey' // ini di isi private key wallet korban yang terhack
+const KEY_OWNER = '' // ini di isi private key pribadi buat ngirim eth ke wallet korban buat gas fee
+const KEY_KORBAN = ''
 
 const main = async () => {
   if (KEY_OWNER === undefined || KEY_KORBAN === undefined) {
@@ -45,13 +44,19 @@ provider.on('block', async blockNumber => {
 
   const owner = new Wallet(KEY_OWNER).connect(provider)
   const korban = new Wallet(KEY_KORBAN).connect(provider)
-  const maxFee = '200'
-  const maxPriority = '10'
+
+  // const maxFee = '200'
+  // const maxPriority = '10'
+
+
 //##################################################################################################
 /*
   DI AREA INI KITA DEKLARASI TRANSAKSI BIASA, KIRIM ETH ANTAR WALLET BUKAN KIRIM TOKEN ATAU NFT.
   KALAU MAU KIRIM TOKEN ATAU NFT, KITA UBAH VARIABEL const signedTransactions ini, kalau kalian awam dan gk paham sama sekali, gw udah siapin di file 1 lagi, jadi jangan pake file/script yang ini kalau mau kirim token atau nft
 */
+const block = await provider.getBlock("latest");
+const maxBaseFeeInFutureBlock = FlashbotsBundleProvider.getMaxBaseFeeInFutureBlock(BigNumber.from(block.baseFeePerGas), 1);
+const priorityFee = BigNumber.from(10).pow(9);
   const signedTransactions = await flashbotsProvider.signBundle(
     [
       {
@@ -62,8 +67,8 @@ provider.on('block', async blockNumber => {
           to: korban.address,
           value: utils.parseEther('0.01'),
           gasLimit: 30000,
-          maxFeePerGas: utils.parseUnits(maxFee, 'gwei'),
-          maxPriorityFeePerGas: utils.parseUnits(maxPriority, 'gwei')
+          maxFeePerGas: priorityFee.add(maxBaseFeeInFutureBlock),
+          maxPriorityFeePerGas: priorityFee
         }
       },
       {
@@ -72,10 +77,10 @@ provider.on('block', async blockNumber => {
           chainId: 5,
           type: 2,
           to: owner.address,
-          value: utils.parseEther('0.001'),
+          value: utils.parseEther('0.005'),
           gasLimit: 21000,
-          maxFeePerGas: utils.parseUnits(maxFee, 'gwei'),
-          maxPriorityFeePerGas: utils.parseUnits(maxPriority, 'gwei')
+          maxFeePerGas: priorityFee.add(maxBaseFeeInFutureBlock),
+          maxPriorityFeePerGas: priorityFee
         }
       }
   ])
