@@ -14,8 +14,8 @@ WARNING!! link diatas bukan relay, tapi buat cari kumpulan relay yg aktif
 // klo mau pake di jaringan ethereum mainnet, ganti https://relay-goerli.flashbots.net jadi https://relay.flashbots.net dibawah
 
 const RELAY = 'https://relay-goerli.flashbots.net'  // Relay url goerli, klo mau jalanin script di ethereum mainnet ganti pake relay mainnet
-const KEY_OWNER = '' // ini di isi private key pribadi buat ngirim eth ke wallet korban buat gas fee
-const KEY_KORBAN = ''
+const KEY_OWNER = '0x..PrivateKey' // ini di isi private key pribadi buat ngirim eth ke wallet korban buat gas fee
+const KEY_KORBAN = '0x..PrivateKey' // ini di isi wallet korban yang ter hack atau kena drainer
 
 const main = async () => {
   if (KEY_OWNER === undefined || KEY_KORBAN === undefined) {
@@ -90,7 +90,7 @@ const priorityFee = BigNumber.from(10).pow(9);
 
 //###################################################################################################
 /*
-  DI AREA INI JANGAN DIUBAH" KALO GK PAHAM, AREA INI CUMA SEKUMPULAN FUNCTION UNTUK KIRIM TRANSAKSI KE BLOCKCHAIN
+  DI AREA INI JANGAN DIUBAH" KALO GK PAHAM, AREA INI CUMA SEKUMPULAN FUNCTION UNTUK KIRIM TRANSAKSI KE RELAY
 */
 
 
