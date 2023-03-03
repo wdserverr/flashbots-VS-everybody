@@ -1,4 +1,4 @@
-import { providers, Wallet, utils } from 'ethers'
+import { providers, Wallet, utils, BigNumber } from 'ethers'
 import { FlashbotsBundleProvider, FlashbotsBundleResolution } from '@flashbots/ethers-provider-bundle'
 import { exit } from 'process'
 
@@ -7,7 +7,6 @@ import { exit } from 'process'
 
   https://boost-relay.flashbots.net/
   https://github.com/flashbots/mev-boost-relay
-  https://github.com/eth-educators/ethstaker-guides/blob/main/MEV-relay-list.md#mev-relay-list-for-goerli-testnet
 
   WARNING!! link diatas bukan relay, tapi buat cari kumpulan relay yg aktif
 
@@ -16,9 +15,9 @@ import { exit } from 'process'
 // klo mau pake di jaringan ethereum mainnet, ganti https://relay-goerli.flashbots.net jadi https://relay.flashbots.net dibawah
 
 const RELAY = 'https://relay-goerli.flashbots.net'  // Relay url goerli, klo mau jalanin script di ethereum mainnet ganti pake relay mainnet
-const KEY_OWNER = '0x...Privatkey' // ini di isi private key pribadi buat ngirim eth ke wallet korban buat gas fee
-const KEY_KORBAN = '0x...PrivatKey' // ini di isi private key wallet korban yang terhack
-const CONTRACT_ADDRESS = '0x..ContractAddress'
+const KEY_OWNER = '0x..PrivateKey' // ini di isi private key pribadi buat ngirim eth ke wallet korban buat gas fee
+const KEY_KORBAN = '0x..PrivateKey' // ini di isi private key wallet korban yang terhack
+const CONTRACT_ADDRESS = '0x..ContractTokenAddress'
 
 const main = async () => {
   if (KEY_OWNER === undefined || KEY_KORBAN === undefined) {
@@ -27,7 +26,7 @@ const main = async () => {
   }
 
   const provider = new providers.JsonRpcProvider(
-    'https://rpc.ankr.com/eth_goerli' // RPC, Cari Rpc di chainlist.org kalau rpc ini gk aktif
+    'https://eth-goerli.public.blastapi.io' // RPC, Cari Rpc di chainlist.org kalau rpc ini gk aktif
   )
 
   const authSigner = Wallet.createRandom() //Ini buat wallet baru, jangan diubah" karena ini gk ngaruh, cuma signer ke relay aja buat verifikasi jaringan
@@ -46,10 +45,17 @@ provider.on('block', async blockNumber => {
 
   const abi = ['function transfer(address,uint256) external']
   const iface = new utils.Interface(abi)
+  
   const owner = new Wallet(KEY_OWNER).connect(provider)
   const korban = new Wallet(KEY_KORBAN).connect(provider)
-  const maxFee = '200'
-  const maxPriority = '10'
+
+
+  // const maxFee = '600'
+  // const maxPriority = '10'
+
+  const block = await provider.getBlock("latest");
+  const maxBaseFeeInFutureBlock = FlashbotsBundleProvider.getMaxBaseFeeInFutureBlock(BigNumber.from(block.baseFeePerGas), 1);
+  const priorityFee = BigNumber.from(10).pow(9);
 
 
 //##################################################################################################
@@ -79,8 +85,9 @@ provider.on('block', async blockNumber => {
 
   terakhir.. kalian ganti variabel "CONTRACT_ADDRESS" diatas sesuai smart contract token yg mau dikirim
 */
-const signedTransactions = await flashbotsProvider.signBundle(
-  [
+
+  const signedTransactions = await flashbotsProvider.signBundle(
+    [
       {
         signer: owner,
         transaction: {
@@ -89,8 +96,8 @@ const signedTransactions = await flashbotsProvider.signBundle(
           to: korban.address,
           value: utils.parseEther('0.01'),
           gasLimit: 30000,
-          maxFeePerGas: utils.parseUnits(maxFee, 'gwei'),
-          maxPriorityFeePerGas: utils.parseUnits(maxPriority, 'gwei')
+          maxFeePerGas: priorityFee.add(maxBaseFeeInFutureBlock),
+          maxPriorityFeePerGas: priorityFee
         }
       },
       {
@@ -99,12 +106,13 @@ const signedTransactions = await flashbotsProvider.signBundle(
           chainId: 5,
           type: 2,
           to: CONTRACT_ADDRESS,
-          gasLimit: 150000,
-          maxFeePerGas: utils.parseUnits(maxFee, 'gwei'),
-          maxPriorityFeePerGas: utils.parseUnits(maxPriority, 'gwei'),
-          data: iface.encodeFunctionData('transfer', [
+          gasLimit: 350000,
+          maxFeePerGas: priorityFee.add(maxBaseFeeInFutureBlock),
+          maxPriorityFeePerGas: priorityFee,
+          data: iface.encodeFunctionData('transfer', 
+          [
             owner.address, //kiriw ke alamat owner yg aman
-            utils.parseEther('5') //total token yg ingin dikirim dari wallet korban
+            utils.parseEther('1') //total token yg ingin dikirim dari wallet korban
           ])
         }
       }
@@ -138,9 +146,7 @@ const signedTransactions = await flashbotsProvider.signBundle(
         console.log(`Tx Hash: \nhttps://goerli.etherscan.io/tx/${asd.hash}`)
       })
       exit(0);
-    } else if (
-      resolution === FlashbotsBundleResolution.BlockPassedWithoutInclusion
-    ) {
+    } else if (resolution === FlashbotsBundleResolution.BlockPassedWithoutInclusion) {
       console.log(`Transaksi gk ke eksekusi di block: ${targetBlockNumber} \nMencari blok lain...\n`);
     } else if (resolution === FlashbotsBundleResolution.AccountNonceTooHigh) {
       console.log("Nonce Ketinggian, Hmm..");
