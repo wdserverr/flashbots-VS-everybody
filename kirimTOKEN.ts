@@ -133,7 +133,6 @@ const signedTransactions = await flashbotsProvider.signBundle(
   if (resolution === FlashbotsBundleResolution.BundleIncluded) {
       console.log('######################################################')
       console.log(`Mantapu jiwa!, Transaksi di eksekusi di Block: ${targetBlockNumber}`);
-      console.log('###################################################### \nJangan lupa surbeker \n')
       bundleSubmission.bundleTransactions.map((asd) => {
         console.log(`Tx Hash: \nhttps://goerli.etherscan.io/tx/${asd.hash}`)
       })
