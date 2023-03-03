@@ -7,6 +7,7 @@ Dibawah ini relay ethereum mainnet, klo mau pake relay lain bisa dicari disini
 
 https://boost-relay.flashbots.net/
 https://github.com/flashbots/mev-boost-relay
+https://github.com/eth-educators/ethstaker-guides/blob/main/MEV-relay-list.md#mev-relay-list-for-goerli-testnet
 
 WARNING!! link diatas bukan relay, tapi buat cari kumpulan relay yg aktif
 */
