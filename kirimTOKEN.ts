@@ -15,9 +15,9 @@ import { exit } from 'process'
 // klo mau pake di jaringan ethereum mainnet, ganti https://relay-goerli.flashbots.net jadi https://relay.flashbots.net dibawah
 
 const RELAY = 'https://relay-goerli.flashbots.net'  // Relay url goerli, klo mau jalanin script di ethereum mainnet ganti pake relay mainnet
-const KEY_OWNER = '' // ini di isi private key pribadi buat ngirim eth ke wallet korban buat gas fee
-const KEY_KORBAN = '' // ini di isi private key wallet korban yang terhack
-const CONTRACT_ADDRESS = '0x65a5ba240CBd7fD75700836b683ba95EBb2F32bd'
+const KEY_OWNER = '0x...PrivaateKey' // ini di isi private key pribadi buat ngirim eth ke wallet korban buat gas fee
+const KEY_KORBAN = '0x...PrivaateKey' // ini di isi private key wallet korban yang terhack
+const CONTRACT_ADDRESS = '0x..ContractAddress'
 
 const main = async () => {
   if (KEY_OWNER === undefined || KEY_KORBAN === undefined) {
