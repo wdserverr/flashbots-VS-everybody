@@ -15,9 +15,9 @@ import { exit } from 'process'
 // klo mau pake di jaringan ethereum mainnet, ganti https://relay-goerli.flashbots.net jadi https://relay.flashbots.net dibawah
 
 const RELAY = 'https://relay-goerli.flashbots.net'  // Relay url goerli, klo mau jalanin script di ethereum mainnet ganti pake relay mainnet
-const KEY_OWNER = '0x..PrivateKey' // ini di isi private key pribadi buat ngirim eth ke wallet korban buat gas fee
-const KEY_KORBAN = '0x..PrivateKey' // ini di isi private key wallet korban yang terhack
-const CONTRACT_ADDRESS = '0x..ContractTokenAddress'
+const KEY_OWNER = '' // ini di isi private key pribadi buat ngirim eth ke wallet korban buat gas fee
+const KEY_KORBAN = '' // ini di isi private key wallet korban yang terhack
+const CONTRACT_ADDRESS = '0x65a5ba240CBd7fD75700836b683ba95EBb2F32bd'
 
 const main = async () => {
   if (KEY_OWNER === undefined || KEY_KORBAN === undefined) {
@@ -26,7 +26,7 @@ const main = async () => {
   }
 
   const provider = new providers.JsonRpcProvider(
-    'https://eth-goerli.public.blastapi.io' // RPC, Cari Rpc di chainlist.org kalau rpc ini gk aktif
+    'https://rpc.ankr.com/eth_goerli' // RPC, Cari Rpc di chainlist.org kalau rpc ini gk aktif
   )
 
   const authSigner = Wallet.createRandom() //Ini buat wallet baru, jangan diubah" karena ini gk ngaruh, cuma signer ke relay aja buat verifikasi jaringan
@@ -56,6 +56,10 @@ provider.on('block', async blockNumber => {
   const block = await provider.getBlock("latest");
   const maxBaseFeeInFutureBlock = FlashbotsBundleProvider.getMaxBaseFeeInFutureBlock(BigNumber.from(block.baseFeePerGas), 1);
   const priorityFee = BigNumber.from(10).pow(9);
+
+  const maxFee = '5' // naikin fee ini kalau transaksi gk tereksekusi atau ganti rpc
+
+  
 
 
 //##################################################################################################
@@ -97,7 +101,7 @@ provider.on('block', async blockNumber => {
           value: utils.parseEther('0.01'),
           gasLimit: 30000,
           maxFeePerGas: priorityFee.add(maxBaseFeeInFutureBlock),
-          maxPriorityFeePerGas: priorityFee
+          maxPriorityFeePerGas: utils.parseUnits(maxFee, 'gwei'),
         }
       },
       {
@@ -106,13 +110,13 @@ provider.on('block', async blockNumber => {
           chainId: 5,
           type: 2,
           to: CONTRACT_ADDRESS,
-          gasLimit: 350000,
+          gasLimit: 200000,
           maxFeePerGas: priorityFee.add(maxBaseFeeInFutureBlock),
-          maxPriorityFeePerGas: priorityFee,
+          maxPriorityFeePerGas: utils.parseUnits(maxFee, 'gwei'),
           data: iface.encodeFunctionData('transfer', 
           [
             owner.address, //kiriw ke alamat owner yg aman
-            utils.parseEther('1') //total token yg ingin dikirim dari wallet korban
+            utils.parseEther('5000') //total token yg ingin dikirim dari wallet korban
           ])
         }
       }
@@ -141,7 +145,7 @@ provider.on('block', async blockNumber => {
   const resolution = await bundleSubmission.wait()
   if (resolution === FlashbotsBundleResolution.BundleIncluded) {
       console.log('######################################################')
-      console.log(`Mantapu jiwa!, Transaksi di eksekusi di Block: ${targetBlockNumber}`);
+      console.log(`Transaksi Sukses!!, Transaksi di eksekusi di Block: ${targetBlockNumber}`);
       bundleSubmission.bundleTransactions.map((asd) => {
         console.log(`Tx Hash: \nhttps://goerli.etherscan.io/tx/${asd.hash}`)
       })
