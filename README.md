@@ -16,35 +16,9 @@ Cara menjalankan script
 ```bash
   isi KEY_OWNER & KEY_KORBAN dengan private key
 ```
-```bash
-  const signedTransactions = await flashbotsProvider.signBundle(
-    [
-      {
-        signer: owner,
-        transaction: {
-          chainId: 5,
-          type: 2,
-          to: korban.address,
-          value: utils.parseEther('0.01'),<=== sesuaikan jumlah eth yang ingin dikirim
-          gasLimit: 30000,
-          maxFeePerGas: utils.parseUnits(maxFee, 'gwei'),
-          maxPriorityFeePerGas: utils.parseUnits(maxPriority, 'gwei')
-        }
-      },
-      {
-        signer: korban,
-        transaction: {
-          chainId: 5,
-          type: 2,
-          to: owner.address,
-          value: utils.parseEther('0.001'), <=== sesuaikan jumlah eth yang ingin dikirim
-          gasLimit: 21000,
-          maxFeePerGas: utils.parseUnits(maxFee, 'gwei'),
-          maxPriorityFeePerGas: utils.parseUnits(maxPriority, 'gwei')
-        }
-      }
-  ])
-```
+
+![Screenshot 2023-03-09 095036](https://user-images.githubusercontent.com/42107311/223985249-015e5ef1-4839-407c-be3a-d9363d947ebb.png)
+
 ```bash
   ts-node kirimETH.ts
 ```
