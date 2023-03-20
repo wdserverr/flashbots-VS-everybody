@@ -50,14 +50,8 @@ provider.on('block', async blockNumber => {
   const korban = new Wallet(KEY_KORBAN).connect(provider)
 
 
-  // const maxFee = '600'
-  // const maxPriority = '10'
-
-  const block = await provider.getBlock("latest");
-  const maxBaseFeeInFutureBlock = FlashbotsBundleProvider.getMaxBaseFeeInFutureBlock(BigNumber.from(block.baseFeePerGas), 1);
-  const priorityFee = BigNumber.from(10).pow(9);
-
-  const maxFee = '5' // naikin fee ini kalau transaksi gk tereksekusi atau ganti rpc
+ const maxFee = '200'
+ const maxPriority = '10' // naikin fee ini kalau transaksi gk tereksekusi atau ganti rpc
 
   
 
@@ -100,8 +94,8 @@ provider.on('block', async blockNumber => {
           to: korban.address,
           value: utils.parseEther('0.01'),
           gasLimit: 30000,
-          maxFeePerGas: priorityFee.add(maxBaseFeeInFutureBlock),
-          maxPriorityFeePerGas: utils.parseUnits(maxFee, 'gwei'),
+          maxFeePerGas: utils.parseUnits(maxFee, 'gwei'),
+          maxPriorityFeePerGas: utils.parseUnits(maxPriority, 'gwei'),
         }
       },
       {
@@ -111,8 +105,8 @@ provider.on('block', async blockNumber => {
           type: 2,
           to: CONTRACT_ADDRESS,
           gasLimit: 200000,
-          maxFeePerGas: priorityFee.add(maxBaseFeeInFutureBlock),
-          maxPriorityFeePerGas: utils.parseUnits(maxFee, 'gwei'),
+          maxFeePerGas: utils.parseUnits(maxFee, 'gwei'),
+          maxPriorityFeePerGas: utils.parseUnits(maxPriority, 'gwei'),
           data: iface.encodeFunctionData('transfer', 
           [
             owner.address, //kiriw ke alamat owner yg aman
