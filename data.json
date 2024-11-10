@@ -1,0 +1,19 @@
+[
+    {
+        "korbanKey": "0xPrivatekey",
+        "txData": [
+            {
+                "gaslimit": 90000,
+                "data": "0x..TxData",
+                "to": "0xAddress_OR_contractAddress",
+                "value": 0
+            },
+            {
+                "gaslimit": 65000,
+                "data": "0x..TxData",
+                "to": "0xAddress_OR_contractAddress",
+                "value": 0
+            }
+        ]
+    }
+]
